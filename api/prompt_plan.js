@@ -22,7 +22,7 @@ Reglas:
   - Insulina alta (alrededor entreno): proteína + carbohidratos.
 
 Detalla brevemente en cada comida los macros, estado hormonal predominante y suplementación recomendada solo si es relevante. MUESTRA SUMA TOTAL DE MACROS
-
+Intenta recomendar tres comidas de dos platos  + pre entreno y post entreno. 
 
 `;
 
