@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PlanNutricionalEntreno from './components/PlanNutricionalEntreno';
 
 const actividadFactor = {
   'Sedentario': [1.1, 1.2, 1.2, 1.3, 1.4, 1.5, 1.5, 1.5],
