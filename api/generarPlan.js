@@ -1,66 +1,145 @@
+import { useState } from "react";
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Solo se permiten solicitudes POST' });
-  }
+export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, objetivo }) {
+  const [horaEntreno, setHoraEntreno] = useState("");
+  const [tipoEntreno, setTipoEntreno] = useState("");
+  const [intensidad, setIntensidad] = useState("");
+  const [duracion, setDuracion] = useState("");
+  const [otrasIntolerancias, setOtrasIntolerancias] = useState("");
+  const [intoleranciasSeleccionadas, setIntoleranciasSeleccionadas] = useState([]);
+  const [planGenerado, setPlanGenerado] = useState(null);
+  const [cargando, setCargando] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
-  const { edad, peso, altura, sexo, GET, tipoEntreno, horaEntreno, intensidad, duracion, intolerancias } = req.body;
+  const tiposEntrenamiento = [
+    "Fuerza / Hipertrofia",
+    "HIIT / CrossFit",
+    "Cardio Largo",
+    "Cardio con Series",
+    "Entrenamiento Suave / Técnica / Yoga",
+    "Deporte en equipo",
+    "Recuperación / Sin entrenamiento",
+  ];
 
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Falta la API Key de OpenAI' });
-  }
+  const intensidades = [
+    { nivel: "Baja", descripcion: "Conversacional, sin fatiga." },
+    { nivel: "Media", descripcion: "Moderada, ritmo constante." },
+    { nivel: "Alta", descripcion: "Esfuerzo intenso, intervalos o carga alta." },
+  ];
 
-  const promptSistema = `Eres un nutricionista experto en fisiología y rendimiento deportivo. Tu misión es dar un menú diario al deportista en función del entrenamiento que tenga ese día.
+  const intoleranciasHabituales = ["Lácteos", "Gluten", "Frutos secos", "Huevos", "Soja"];
 
-  Instrucciones:
-  - La comida es normocalórica según el GET. Si quiere ganar peso, que coma un poco más. Si quiere perder, un poco menos.
-  - Las recomendaciones girarán siempre alrededor del entrenamiento del día y su horario.
+  const toggleIntolerancia = (item) => {
+    setIntoleranciasSeleccionadas(prev =>
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
 
-  Datos recogidos:
-  - Edad: ${edad}
-  - Peso: ${peso} kg
-  - Altura: ${altura} cm
-  - Sexo: ${sexo}
-  - Gasto energético total (GET): ${GET} kcal
-  - Tipo de entrenamiento: ${tipoEntreno}
-  - Hora del entrenamiento: ${horaEntreno}
-  - Intensidad del entrenamiento: ${intensidad}
-  - Duración del entrenamiento: ${duracion} minutos
-  - Intolerancias o alimentos a evitar: ${intolerancias.join(", ")}
+  const generarPlan = async () => {
+    setCargando(true);
+    setPlanGenerado(null);
+    try {
+      const response = await fetch("/api/generarPlan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          edad, peso, altura, sexo, GET, objetivo,
+          tipoEntreno, horaEntreno, intensidad, duracion,
+          intolerancias: [...intoleranciasSeleccionadas, ...(otrasIntolerancias ? [otrasIntolerancias] : [])]
+        }),
+      });
 
-  Pide una dieta diaria que incluya:
-  1. Breve explicación inicial de cómo está ajustada la dieta.
-  2. Distribución horaria de las comidas según el entrenamiento.
-  3. Justificación fisiológica de cada comida (estado hormonal, rutas energéticas, etc.).
-  4. Tabla final de macros (proteínas, grasas, CH).
-  5. Suplementos si procede.`;
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: promptSistema },
-        ],
-        temperature: 0.8,
-        max_tokens: 1800,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+      const data = await response.json();
+      if (data.plan) {
+        setPlanGenerado(data.plan);
+      } else {
+        setPlanGenerado("❌ Error al generar el plan. Intenta de nuevo.");
+      }
+    } catch (err) {
+      setPlanGenerado("❌ Ha ocurrido un error inesperado.");
     }
+    setCargando(false);
+  };
 
-    return res.status(200).json({ plan: data.choices[0].message.content });
+  return (
+    <div className="p-6 max-w-2xl mx-auto bg-white shadow-md rounded-2xl">
+      <h2 className="text-2xl font-bold mb-4">🎯 Plan Nutricional Diario según tu Entrenamiento</h2>
 
-  } catch (error) {
-    return res.status(500).json({ error: 'Error al generar el plan nutricional' });
-  }
+      <button
+        onClick={() => setMostrarFormulario(!mostrarFormulario)}
+        className="bg-orange-100 text-orange-700 px-4 py-2 rounded mb-4 hover:bg-orange-200 transition"
+      >
+        {mostrarFormulario ? "🔽 Ocultar formulario" : "📋 Mostrar formulario para plan personalizado"}
+      </button>
+
+      {mostrarFormulario && (
+        <div className="space-y-4">
+          <div>
+            <label className="block font-semibold">⏰ Hora del entrenamiento</label>
+            <input type="time" className="w-full p-2 border rounded" value={horaEntreno} onChange={e => setHoraEntreno(e.target.value)} />
+          </div>
+
+          <div>
+            <label className="block font-semibold">🏋️ Tipo de entrenamiento</label>
+            <select className="w-full p-2 border rounded" value={tipoEntreno} onChange={e => setTipoEntreno(e.target.value)}>
+              <option value="">Selecciona uno</option>
+              {tiposEntrenamiento.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold">🔋 Intensidad</label>
+            <div className="space-y-1">
+              {intensidades.map(i => (
+                <label key={i.nivel} className="flex items-center space-x-2">
+                  <input type="radio" name="intensidad" value={i.nivel} onChange={e => setIntensidad(e.target.value)} />
+                  <span><strong>{i.nivel}</strong>: {i.descripcion}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold">⏳ Duración (minutos)</label>
+            <input type="number" className="w-full p-2 border rounded" value={duracion} onChange={e => setDuracion(e.target.value)} />
+          </div>
+
+          <div>
+            <label className="block font-semibold">🚫 Intolerancias habituales</label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {intoleranciasHabituales.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => toggleIntolerancia(item)}
+                  className={`px-3 py-1 rounded-full border ${intoleranciasSeleccionadas.includes(item) ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold mt-2">📝 Otras intolerancias</label>
+            <input type="text" className="w-full p-2 border rounded" value={otrasIntolerancias} onChange={e => setOtrasIntolerancias(e.target.value)} />
+          </div>
+
+          <button
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mt-4"
+            onClick={generarPlan}
+            disabled={cargando}
+          >
+            {cargando ? "⏳ Generando..." : "🍽️ Generar Plan Diario"}
+          </button>
+        </div>
+      )}
+
+      {planGenerado && (
+        <div className="mt-6 bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
+          <h3 className="text-xl font-bold mb-2">Resultado</h3>
+          <p>{planGenerado}</p>
+        </div>
+      )}
+    </div>
+  );
 }
