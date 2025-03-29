@@ -56,7 +56,8 @@ Al final, muestra una tabla con:
       return res.status(500).json({ error: "Respuesta inválida del modelo" });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Error al generar el plan nutricional" });
+   console.error("🔴 Error GPT:", error);
+return res.status(500).json({ error: error.message || "Error desconocido" });
   }
 }
 
