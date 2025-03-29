@@ -62,6 +62,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
           { role: "user", content: promptFinal },
         ],
         temperature: 0.7,
+         max_tokens: 800,
       }),
     });
 
