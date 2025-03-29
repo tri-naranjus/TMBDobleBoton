@@ -1,4 +1,4 @@
-# TMBCalculadora
+# TMBCalculadora 
 
 Incluye módulo de plan nutricional diario con conexión a OpenAI vía API Serverless (/api/generarPlan).
 
