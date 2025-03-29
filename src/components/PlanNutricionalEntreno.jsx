@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, objetivo }) {
