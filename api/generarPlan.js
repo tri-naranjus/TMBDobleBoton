@@ -39,7 +39,7 @@ Al final, muestra una tabla con:
         Authorization: `Bearer ${process.env.OPENAI_API_KEY1}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [
           { role: "system", content: "Eres un nutricionista experto en fisiología y rendimiento deportivo." },
           { role: "user", content: prompt },
