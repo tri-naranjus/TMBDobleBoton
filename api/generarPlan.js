@@ -38,6 +38,11 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
 
   const promptFinal = `${promptTemplate}\n\nDatos del usuario:\n${datosUsuario}`;
 
+  console.log("🧪 Entrando a generarPlan...");
+  console.log("📦 PromptTemplate:", promptTemplate.slice(0, 100));
+  console.log("📥 Datos usuario:", req.body);
+  console.log("📤 Prompt final:", promptFinal.slice(0, 200));
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -60,10 +65,12 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
     });
 
     const data = await response.json();
+    console.log("📥 Respuesta GPT:", data);
 
     if (data?.choices?.[0]?.message?.content) {
       return res.status(200).json({ plan: data.choices[0].message.content });
     } else {
+      console.error("⚠️ Respuesta vacía o inesperada:", data);
       return res.status(500).json({ error: "Respuesta inválida del modelo" });
     }
   } catch (error) {
