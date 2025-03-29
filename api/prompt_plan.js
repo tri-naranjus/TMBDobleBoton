@@ -1,6 +1,6 @@
 
 const prompt = `
-Eres un nutricionista experto en crononutrición y fisiología hormonal deportiva. Crea un menú diario con 4–5 comidas según los siguientes datos del usuario:
+Eres un nutricionista experto en crononutrición y fisiología hormonal deportiva. Diseña plan nutricional diario (3 comidas principales + pre/post entreno)
 
 - Sexo, edad, peso, altura
 - Tipo, intensidad, duración y horario del entrenamiento
