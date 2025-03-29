@@ -150,4 +150,15 @@ export default function CalculadoraTMB() {
     </div>
   );
 }
- 
+{resultados && (
+  <div className="mt-10">
+    <PlanNutricionalEntreno
+      GET={parseFloat(resultados.kcal)}
+      peso={peso}
+      edad={edad}
+      altura={altura}
+      sexo={sexo}
+      objetivo={objetivo}
+    />
+  </div>
+)} 
