@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PlanNutricionalEntreno from './components/PlanNutricionalEntreno';
 
@@ -132,33 +133,34 @@ export default function CalculadoraTMB() {
       </div>
 
       {resultados && (
-        <div className="bg-orange-50 p-6 rounded-xl shadow-inner space-y-3">
-          <p><strong>🔥 TMB promedio:</strong> {resultados.tmb} kcal<br /><span className="text-sm text-gray-600">Tu gasto basal en reposo, sin actividad física.</span></p>
-          <p><strong>⚖️ GET (mantenimiento):</strong> {resultados.get} kcal<br /><span className="text-sm text-gray-600">Gasto total diario incluyendo entreno y termogénesis.</span></p>
-          <p><strong>📉 Déficit recomendado:</strong> {resultados.deficit} kcal<br /><span className="text-sm font-bold text-red-600">* No se recomienda un déficit superior a 400 kcal durante largos periodos por riesgo de rebote.</span></p>
-          <p><strong>📈 Superávit conservador (rendimiento):</strong> {resultados.superavitConservador} kcal<br /><span className="text-sm text-gray-600">Ideal para mantener rendimiento o ganar músculo de forma controlada.</span></p>
-          <p><strong>💪 Superávit normal (ganancia muscular):</strong> {resultados.superavitModerado} kcal<br /><span className="text-sm text-gray-600">Promueve ganancia muscular sin excesivo aumento graso.</span></p>
-          <p><strong>🍽️ Superávit alto (aumento sustancial de peso):</strong> {resultados.superavitAlto} kcal<br /><span className="text-sm text-gray-600">Para volumen agresivo o personas con gran gasto calórico.</span></p>
-          <hr className="my-4" />
-          <p className="text-lg font-bold text-orange-600">🍎 Recomendación de macronutrientes ({resultados.objetivo}):</p>
-          <p><strong>🔹 Calorías objetivo:</strong> {resultados.kcal} kcal</p>
-          <p><strong>🥚 Proteínas:</strong> {resultados.proteinas} g</p>
-          <p><strong>🥑 Grasas:</strong> {resultados.grasas} g</p>
-          <p><strong>🍞 Carbohidratos:</strong> {resultados.carbohidratos} g</p>
-        </div>
+        <>
+          <div className="bg-orange-50 p-6 rounded-xl shadow-inner space-y-3">
+            <p><strong>🔥 TMB promedio:</strong> {resultados.tmb} kcal</p>
+            <p><strong>⚖️ GET (mantenimiento):</strong> {resultados.get} kcal</p>
+            <p><strong>📉 Déficit recomendado:</strong> {resultados.deficit} kcal</p>
+            <p><strong>📈 Superávit conservador:</strong> {resultados.superavitConservador} kcal</p>
+            <p><strong>💪 Superávit normal:</strong> {resultados.superavitModerado} kcal</p>
+            <p><strong>🍽️ Superávit alto:</strong> {resultados.superavitAlto} kcal</p>
+            <hr className="my-4" />
+            <p className="text-lg font-bold text-orange-600">🍎 Recomendación de macronutrientes ({resultados.objetivo}):</p>
+            <p><strong>🔹 Calorías objetivo:</strong> {resultados.kcal} kcal</p>
+            <p><strong>🥚 Proteínas:</strong> {resultados.proteinas} g</p>
+            <p><strong>🥑 Grasas:</strong> {resultados.grasas} g</p>
+            <p><strong>🍞 Carbohidratos:</strong> {resultados.carbohidratos} g</p>
+          </div>
+
+          <div className="mt-10">
+            <PlanNutricionalEntreno
+              GET={parseFloat(resultados.kcal)}
+              peso={peso}
+              edad={edad}
+              altura={altura}
+              sexo={sexo}
+              objetivo={objetivo}
+            />
+          </div>
+        </>
       )}
     </div>
   );
 }
-{resultados && (
-  <div className="mt-10">
-    <PlanNutricionalEntreno
-      GET={parseFloat(resultados.kcal)}
-      peso={peso}
-      edad={edad}
-      altura={altura}
-      sexo={sexo}
-      objetivo={objetivo}
-    />
-  </div>
-)} 
