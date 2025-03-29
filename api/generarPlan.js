@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import promptTemplate from './prompt_plan.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -28,7 +29,7 @@ ENTRENAMIENTO:
 INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
 `;
 
-  const promptFinal = `${promptTemplate}\n\nDatos del usuario:${datosUsuario}`;
+  const promptFinal = `${promptTemplate}\n\nDatos del usuario:\n${datosUsuario}`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
