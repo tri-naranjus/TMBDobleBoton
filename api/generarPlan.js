@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import promptTemplate from './prompt_plan.js';
 
 export default async function handler(req, res) {
@@ -8,9 +6,6 @@ export default async function handler(req, res) {
   }
 
   const { edad, peso, altura, sexo, GET, objetivo, tipoEntreno, horaEntreno, intensidad, duracion, intolerancias } = req.body;
-
-  const promptPath = path.join(process.cwd(), 'src/api/prompt_plan.txt');
-  const promptTemplate = fs.readFileSync(promptPath, 'utf8');
 
   const datosUsuario = `
 EDAD: ${edad}
@@ -41,7 +36,11 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES AL PIE DE LA LETRA, MUESTRA LA DIETA EN FORMATO TABLA" },
+          {
+            role: "system",
+            content:
+              "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES AL PIE DE LA LETRA, MUESTRA LA DIETA EN FORMATO TABLA",
+          },
           { role: "user", content: promptFinal },
         ],
         temperature: 0.7,
