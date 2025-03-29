@@ -40,7 +40,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "Eres un nutricionista experto en fisiología y rendimiento deportivo." },
+          { role: "system", content: "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES AL PIE DE LA LETRA, MUESTRA LA DIETA EN FORMATO TABLA" },
           { role: "user", content: promptFinal },
         ],
         temperature: 0.7,
