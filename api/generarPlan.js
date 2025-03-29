@@ -5,7 +5,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const { edad, peso, altura, sexo, GET, objetivo, tipoEntreno, horaEntreno, intensidad, duracion, intolerancias } = req.body;
+  const {
+    edad,
+    peso,
+    altura,
+    sexo,
+    GET,
+    objetivo,
+    tipoEntreno,
+    horaEntreno,
+    intensidad,
+    duracion,
+    intolerancias,
+  } = req.body;
 
   const datosUsuario = `
 EDAD: ${edad}
