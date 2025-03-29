@@ -57,7 +57,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
           {
             role: "system",
             content:
-              "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES AL PIE DE LA LETRA, MUESTRA LA DIETA EN FORMATO TABLA",
+              "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES ",
           },
           { role: "user", content: promptFinal },
         ],
