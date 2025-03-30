@@ -58,7 +58,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
           {
             role: "system",
             content:
-              "Eres un nutricionista experto en fisiología y rendimiento deportivo. SIGUE LAS SIGUIENTES INSTRUCCIONES ",
+              "Eres un nutricionista experto en fisiología y rendimiento deportivo. Usa emojis. SIGUE LAS SIGUIENTES INSTRUCCIONES ",
           },
           { role: "user", content: promptFinal },
         ],
