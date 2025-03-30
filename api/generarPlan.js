@@ -1,6 +1,5 @@
 // redeploy trigger
 import promptTemplate from './prompt_plan.js';
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -50,7 +49,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY1}`,
 
       },
       body: JSON.stringify({
