@@ -1,4 +1,4 @@
-import promptTemplate from './prompt_plan_claude.js';
+import promptClaude from './prompt_plan_claude.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -27,7 +27,7 @@ ENTRENAMIENTO:
 INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
   `;
 
-  const promptFinal = `${promptTemplate}\n\nDatos del usuario:\n${datosUsuario}`;
+  const promptFinal = `${promptClaude}\n\nDatos del usuario:\n${datosUsuario}`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
