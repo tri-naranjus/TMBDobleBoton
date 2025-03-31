@@ -41,11 +41,15 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
         model: "claude-3-sonnet-20240229",
         max_tokens: 1000,
         messages: [
-          {
-            role: "user",
-            content: promptFinal
-          }
-        ]
+  {
+    role: "system",
+    content: "Eres un nutricionista experto. Crea un menú personalizado según los datos que recibas."
+  },
+  {
+    role: "user",
+    content: promptFinal
+  }
+]
       }),
     });
 
