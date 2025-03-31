@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, objetivo }) {
@@ -11,6 +10,7 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
   const [planGenerado, setPlanGenerado] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [errorGPT, setErrorGPT] = useState(false); // NUEVO
 
   const tiposEntrenamiento = [
     "Fuerza / Hipertrofia",
@@ -36,29 +36,69 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
     );
   };
 
+  const datos = {
+    edad,
+    peso,
+    altura,
+    sexo,
+    GET,
+    objetivo,
+    tipoEntreno,
+    horaEntreno,
+    intensidad,
+    duracion,
+    intolerancias: [...intoleranciasSeleccionadas, ...(otrasIntolerancias ? [otrasIntolerancias] : [])]
+  };
+
   const generarPlan = async () => {
     setCargando(true);
     setPlanGenerado(null);
+    setErrorGPT(false);
+
     try {
       const response = await fetch("/api/generarPlan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          edad, peso, altura, sexo, GET, objetivo,
-          tipoEntreno, horaEntreno, intensidad, duracion,
-          intolerancias: [...intoleranciasSeleccionadas, ...(otrasIntolerancias ? [otrasIntolerancias] : [])]
-        }),
+        body: JSON.stringify(datos),
       });
 
       const data = await response.json();
-      if (data.plan) {
+
+      if (response.ok && data.plan) {
         setPlanGenerado(data.plan);
       } else {
-        setPlanGenerado("❌ Error al generar el plan. Intenta de nuevo.");
+        setErrorGPT(true);
       }
     } catch (err) {
-      setPlanGenerado("❌ Ha ocurrido un error inesperado.");
+      setErrorGPT(true);
     }
+
+    setCargando(false);
+  };
+
+  const generarPlanConClaude = async () => {
+    setCargando(true);
+    setPlanGenerado(null);
+    setErrorGPT(false);
+
+    try {
+      const response = await fetch("/api/plan_claude", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.plan) {
+        setPlanGenerado(data.plan);
+      } else {
+        setPlanGenerado("❌ También hubo un error con Claude.");
+      }
+    } catch (err) {
+      setPlanGenerado("❌ También hubo un error con Claude.");
+    }
+
     setCargando(false);
   };
 
@@ -141,6 +181,19 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
           <p>{planGenerado}</p>
         </div>
       )}
+
+      {errorGPT && !planGenerado && (
+        <div className="mt-6 bg-red-100 border border-red-300 p-4 rounded-lg text-red-700">
+          <p className="font-semibold mb-2">❌ No se pudo generar el plan con GPT-4o.</p>
+          <button
+            onClick={generarPlanConClaude}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            🔁 Reintentar con Claude Sonnet
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
