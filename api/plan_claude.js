@@ -25,7 +25,7 @@ ENTRENAMIENTO:
 - Duración: ${duracion} minutos
 
 INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
-  `;
+`;
 
   const promptFinal = `${promptClaude}\n\nDatos del usuario:\n${datosUsuario}`;
 
@@ -35,19 +35,19 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       headers: {
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         model: "claude-3-7-sonnet-20250219",
         max_tokens: 1000,
-       system: "Eres un nutricionista experto. Crea un menú nutricional adaptado.",
-messages: [
-  {
-    role: "user",
-    content: promptFinal
-  }
-]
-      }),
+        system: "Eres un nutricionista experto en fisiología, salud metabólica y planificación alimentaria personalizada.",
+        messages: [
+          {
+            role: "user",
+            content: promptFinal
+          }
+        ]
+      })
     });
 
     const data = await response.json();
