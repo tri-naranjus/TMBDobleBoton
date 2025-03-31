@@ -1,23 +1,11 @@
-// redeploy trigger
-import promptTemplate from './prompt_plan.js';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
   const {
-    edad,
-    peso,
-    altura,
-    sexo,
-    GET,
-    objetivo,
-    tipoEntreno,
-    horaEntreno,
-    intensidad,
-    duracion,
-    intolerancias,
+    edad, peso, altura, sexo, GET, objetivo,
+    tipoEntreno, horaEntreno, intensidad, duracion, intolerancias
   } = req.body;
 
   const datosUsuario = `
@@ -32,52 +20,92 @@ ENTRENAMIENTO:
 - Tipo: ${tipoEntreno}
 - Hora: ${horaEntreno}
 - Intensidad: ${intensidad}
-- Duración: ${duracion} min
+- Duración: ${duracion} minutos
 
 INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
 `;
 
-  const promptFinal = `${promptTemplate}\n\nDatos del usuario:\n${datosUsuario}`;
-
-  console.log("🧪 Entrando a generarPlan...");
-  console.log("📦 PromptTemplate:", promptTemplate.slice(0, 100));
-  console.log("📥 Datos usuario:", req.body);
-  console.log("📤 Prompt final:", promptFinal.slice(0, 200));
-
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const assistantId = "asst_EoXmMOlc4BvPgysPIWYR0mri";
+
+    // 1. Crear un nuevo hilo (thread)
+    const threadRes = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-
+        "OpenAI-Beta": "assistants=v1",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Eres un nutricionista experto en fisiología y rendimiento deportivo. Usa emojis. SIGUE LAS SIGUIENTES INSTRUCCIONES ",
-          },
-          { role: "user", content: promptFinal },
-        ],
-        temperature: 0.7,
-         max_tokens: 1000,
-      }),
+      body: JSON.stringify({})
     });
 
-    const data = await response.json();
-    console.log("📥 Respuesta GPT:", data);
+    const thread = await threadRes.json();
 
-    if (data?.choices?.[0]?.message?.content) {
-      return res.status(200).json({ plan: data.choices[0].message.content });
+    // 2. Añadir mensaje del usuario
+    await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "OpenAI-Beta": "assistants=v1",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        role: "user",
+        content: datosUsuario
+      })
+    });
+
+    // 3. Lanzar la ejecución
+    const runRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "OpenAI-Beta": "assistants=v1",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId
+      })
+    });
+
+    const run = await runRes.json();
+
+    // 4. Esperar la respuesta (polling)
+    let status = run.status;
+    let output;
+
+    while (status !== "completed" && status !== "failed" && status !== "cancelled") {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const checkRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "OpenAI-Beta": "assistants=v1"
+        }
+      });
+
+      const updated = await checkRes.json();
+      status = updated.status;
+    }
+
+    if (status === "completed") {
+      const messagesRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "OpenAI-Beta": "assistants=v1"
+        }
+      });
+
+      const messages = await messagesRes.json();
+      const lastMessage = messages.data.find(msg => msg.role === "assistant");
+
+      return res.status(200).json({ plan: lastMessage?.content?.[0]?.text || "❌ Sin respuesta del modelo." });
     } else {
-      console.error("⚠️ Respuesta vacía o inesperada:", data);
-      return res.status(500).json({ error: "Respuesta inválida del modelo" });
+      return res.status(500).json({ error: "La ejecución del assistant falló o fue cancelada." });
     }
   } catch (error) {
-    console.error("🔴 Error GPT:", error);
-    return res.status(500).json({ error: error.message || "Error desconocido" });
+    console.error("🔴 Error Assistant:", error);
+    return res.status(500).json({ error: error.message || "Error desconocido con Assistant." });
   }
 }
+
