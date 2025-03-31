@@ -11,28 +11,40 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
   const [cargando, setCargando] = useState(false);
 
   const generarPlan = async () => {
+    console.log("🚀 Ejecutando función generarPlan()");
     setCargando(true);
     setPlanGenerado(null);
 
-    const response = await fetch("/api/generarPlan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        edad, peso, altura, sexo, GET, objetivo,
-        tipoEntreno, horaEntreno, intensidad, duracion,
-        intolerancias: [...intoleranciasSeleccionadas]
-      })
-    });
+    try {
+      const response = await fetch("/api/generarPlan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          edad, peso, altura, sexo, GET, objetivo,
+          tipoEntreno, horaEntreno, intensidad, duracion,
+          intolerancias: [...intoleranciasSeleccionadas]
+        })
+      });
 
-    const data = await response.json();
-    setCargando(false);
+      const data = await response.json();
+      console.log("📥 Plan:", data.plan);
+      console.log("📦 Prompt:", data.prompt);
 
-    if (data?.plan) {
-      setPlanGenerado(data.plan);
-      setPromptUsado(data.prompt); // Mostramos el prompt usado
-    } else {
-      setPlanGenerado("❌ Error al generar el plan.");
+      if (data?.plan) {
+        setPlanGenerado(data.plan);
+        setPromptUsado(data.prompt);
+      } else {
+        setPlanGenerado("❌ Error al generar el plan.");
+        setPromptUsado("⚠️ Prompt no recibido.");
+      }
+
+    } catch (error) {
+      console.error("❌ Error al generar plan:", error);
+      setPlanGenerado("❌ Fallo al contactar con el servidor.");
+      setPromptUsado(null);
     }
+
+    setCargando(false);
   };
 
   return (
@@ -49,20 +61,19 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
           <h3 className="text-xl font-bold mb-2">🍽️ Resultado</h3>
           <p>{planGenerado}</p>
 
-          {promptUsado && (
-            <details className="mt-6 bg-white p-4 border border-orange-200 rounded-lg">
-  <summary className="cursor-pointer font-semibold text-orange-600">
-    🔍 Ver prompt usado
-  </summary>
-  <pre className="mt-2 text-sm text-gray-700">
-    {promptUsado || "⚠️ No se recibió el prompt."}
-  </pre>
-</details>
-          )}
+          <details className="mt-6 bg-white p-4 border border-orange-200 rounded-lg">
+            <summary className="cursor-pointer font-semibold text-orange-600">
+              🔍 Ver prompt usado
+            </summary>
+            <pre className="mt-2 text-sm text-gray-700">
+              {promptUsado || "⚠️ No se recibió el prompt."}
+            </pre>
+          </details>
         </div>
       )}
     </div>
   );
 }
+
 
 
