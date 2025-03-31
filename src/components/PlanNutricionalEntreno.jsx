@@ -51,11 +51,13 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
 
           {promptUsado && (
             <details className="mt-6 bg-white p-4 border border-orange-200 rounded-lg">
-              <summary className="cursor-pointer font-semibold text-orange-600">
-                🔍 Ver prompt usado
-              </summary>
-              <pre className="mt-2 text-sm text-gray-700">{promptUsado}</pre>
-            </details>
+  <summary className="cursor-pointer font-semibold text-orange-600">
+    🔍 Ver prompt usado
+  </summary>
+  <pre className="mt-2 text-sm text-gray-700">
+    {promptUsado || "⚠️ No se recibió el prompt."}
+  </pre>
+</details>
           )}
         </div>
       )}
