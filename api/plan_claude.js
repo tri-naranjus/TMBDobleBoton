@@ -1,4 +1,4 @@
-import promptTemplate from './prompt_plan.js';
+import promptTemplate from './prompt_plan_claude.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
