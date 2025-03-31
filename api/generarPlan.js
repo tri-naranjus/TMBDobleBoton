@@ -1,3 +1,5 @@
+// ✅ Archivo 1: /api/generarPlan.js (usando Assistant API)
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -28,7 +30,6 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
   try {
     const assistantId = "asst_EoXmMOlc4BvPgysPIWYR0mri";
 
-    // 1. Crear un nuevo hilo (thread)
     const threadRes = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
@@ -41,7 +42,6 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
 
     const thread = await threadRes.json();
 
-    // 2. Añadir mensaje del usuario
     await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
       method: "POST",
       headers: {
@@ -55,7 +55,6 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       })
     });
 
-    // 3. Lanzar la ejecución
     const runRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: "POST",
       headers: {
@@ -70,10 +69,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
 
     const run = await runRes.json();
 
-    // 4. Esperar la respuesta (polling)
     let status = run.status;
-    let output;
-
     while (status !== "completed" && status !== "failed" && status !== "cancelled") {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -99,7 +95,7 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       const messages = await messagesRes.json();
       const lastMessage = messages.data.find(msg => msg.role === "assistant");
 
-      return res.status(200).json({ plan: lastMessage?.content?.[0]?.text || "❌ Sin respuesta del modelo." });
+      return res.status(200).json({ plan: lastMessage?.content?.[0]?.text || "❌ Sin respuesta del modelo.", prompt: datosUsuario });
     } else {
       return res.status(500).json({ error: "La ejecución del assistant falló o fue cancelada." });
     }
@@ -107,5 +103,73 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
     console.error("🔴 Error Assistant:", error);
     return res.status(500).json({ error: error.message || "Error desconocido con Assistant." });
   }
+}
+
+
+// ✅ Archivo 2: PlanNutricionalEntreno.jsx (frontend React con prompt mostrado)
+
+import { useState } from "react";
+
+export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, objetivo }) {
+  const [horaEntreno, setHoraEntreno] = useState("");
+  const [tipoEntreno, setTipoEntreno] = useState("");
+  const [intensidad, setIntensidad] = useState("");
+  const [duracion, setDuracion] = useState("");
+  const [intoleranciasSeleccionadas, setIntoleranciasSeleccionadas] = useState([]);
+  const [planGenerado, setPlanGenerado] = useState(null);
+  const [promptUsado, setPromptUsado] = useState(null);
+  const [cargando, setCargando] = useState(false);
+
+  const generarPlan = async () => {
+    setCargando(true);
+    setPlanGenerado(null);
+
+    const response = await fetch("/api/generarPlan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        edad, peso, altura, sexo, GET, objetivo,
+        tipoEntreno, horaEntreno, intensidad, duracion,
+        intolerancias: [...intoleranciasSeleccionadas]
+      })
+    });
+
+    const data = await response.json();
+    setCargando(false);
+
+    if (data?.plan) {
+      setPlanGenerado(data.plan);
+      setPromptUsado(data.prompt); // Muestra el prompt usado
+    } else {
+      setPlanGenerado("❌ Error al generar el plan.");
+    }
+  };
+
+  return (
+    <div className="p-4 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">🎯 Plan Nutricional Diario</h2>
+      <button onClick={generarPlan} className="bg-orange-500 text-white px-4 py-2 rounded-xl">
+        🍽️ Generar Plan Diario
+      </button>
+
+      {cargando && <p className="mt-4">⏳ Generando...</p>}
+
+      {planGenerado && (
+        <div className="mt-6 bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
+          <h3 className="text-xl font-bold mb-2">🍽️ Resultado</h3>
+          <p>{planGenerado}</p>
+
+          {promptUsado && (
+            <details className="mt-6 bg-white p-4 border border-orange-200 rounded-lg">
+              <summary className="cursor-pointer font-semibold text-orange-600">
+                🔍 Ver prompt usado
+              </summary>
+              <pre className="mt-2 text-sm text-gray-700">{promptUsado}</pre>
+            </details>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
