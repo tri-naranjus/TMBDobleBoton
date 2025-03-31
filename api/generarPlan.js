@@ -1,5 +1,7 @@
 // ✅ Archivo 1: /api/generarPlan.js (usando Assistant API)
 
+
+console.log("🚀 Ejecutando función generarPlan()");
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
