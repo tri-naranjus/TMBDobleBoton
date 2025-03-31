@@ -135,6 +135,19 @@ export default function PlanNutricionalEntreno({ GET, peso, edad, altura, sexo, 
     });
 
     const data = await response.json();
+
+// 👇 Añade estas dos líneas:
+console.log("📥 Plan:", data.plan);
+console.log("📦 Prompt:", data.prompt);
+
+setCargando(false);
+
+if (data?.plan) {
+  setPlanGenerado(data.plan);
+  setPromptUsado(data.prompt); // Guardamos el prompt
+} else {
+  setPlanGenerado("❌ Error al generar el plan.");
+}
     setCargando(false);
 
     if (data?.plan) {
