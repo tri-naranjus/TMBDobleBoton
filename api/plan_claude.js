@@ -38,16 +38,15 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-3-7-sonnet-20250219",
-        max_tokens: 1000,
-        system: "Eres un nutricionista experto en fisiología, salud metabólica y planificación alimentaria personalizada.",
-        messages: [
-          {
-            role: "user",
-            content: promptFinal
-          }
-        ]
-      })
+  model: "claude-3-7-sonnet-20250219",
+  max_tokens: 1000,
+  messages: [
+    {
+      role: "user",
+      content: promptFinal // solo los datos del usuario
+    }
+  ]
+})
     });
 
     const data = await response.json();
