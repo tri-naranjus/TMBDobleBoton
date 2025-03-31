@@ -40,11 +40,8 @@ INTOLERANCIAS: ${intolerancias?.join(', ') || 'Ninguna'}
       body: JSON.stringify({
         model: "claude-3-7-sonnet-20250219",
         max_tokens: 1000,
-        messages: [
-  {
-    role: "system",
-    content: "Eres un nutricionista experto. Crea un menú personalizado según los datos que recibas."
-  },
+       system: "Eres un nutricionista experto. Crea un menú nutricional adaptado.",
+messages: [
   {
     role: "user",
     content: promptFinal
